@@ -55,6 +55,17 @@ joinWith' f (D d) (D d') =
 prod :: Dist a -> Dist b -> Dist (a,b)
 prod = joinWith (,)
 
+-- prod produces "product distributions". A good example of this is with experiments
+-- involving batches of dice
+certainly :: a -> Dist a -- point distribution
+certainly a = D [(a,P 1)]
 
+dice :: Int -> Dist [Int]
+dice 0 = certainly []
+dice n = joinWith (:) die (dice (n-1))
        
+-- However, what happens when independence breaks down? suppose that the second randvar
+-- depends on the first. Then while the first distribution can be a represented by 
+-- Dist a, the second randvar has distribution that depends on a function a -> Dist b.
+
 
