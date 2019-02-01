@@ -1,5 +1,8 @@
 -- Notes on a talk by Tom Schrijvers on the probability monad.
 
+module PMonad where
+import Prelude hiding (sum, Maybe, Just, Nothing, lookup)
+
 -- Main building block of FP: total functions A -> B
 sum :: [Int] -> Int
 sum []     = 0
@@ -29,3 +32,6 @@ member ((k',v):l) k
 
 -- what is probabilistic functional programming?
 -- A -> Dist B
+
+newtype Probability = P Float
+newtype Dist a = D {unD :: [(a, Probability)]}
