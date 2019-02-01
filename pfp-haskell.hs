@@ -43,13 +43,18 @@ example2 = (not . greaterThan2) ?? die
 -- of values (could be twisted by a function) while multiplying their probabilities.
 -- Here list comprehensions really come in handy!
 joinWith :: (a -> b -> c) -> Dist a -> Dist b -> Dist c
-joinWith f (D d) (D d') = D [(f x y, P p*q) | (x,p) <- d, (y,q) <- d']
+joinWith f (D d) (D d') = D [(f x y, P $ p*q) | (x,P p) <- d, (y,P q) <- d']
 
 -- Recall that a list comprehension is really a compressed do-notation:
 joinWith' :: (a -> b -> c) -> Dist a -> Dist b -> Dist c
 joinWith' f (D d) (D d') = 
-    D (do (x,p) <- d
-          (y,q) <- d'
-          return (f x y, P p*q))
+    D (do (x, P p) <- d
+          (y, P q) <- d'
+          return (f x y, P $ p*q))
+
+prod :: Dist a -> Dist b -> Dist (a,b)
+prod = joinWith (,)
+
+
        
 
