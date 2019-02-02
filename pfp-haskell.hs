@@ -67,5 +67,33 @@ dice n = joinWith (:) die (dice (n-1))
 -- However, what happens when independence breaks down? suppose that the second randvar
 -- depends on the first. Then while the first distribution can be a represented by 
 -- Dist a, the second randvar has distribution that depends on a function a -> Dist b.
+-- (=======================)
+-- the above motivation doesn't make much sense to me. A better one is to say that we want
+-- to understand probabilistic functions a -> Dist b, ie functions that return a probability
+-- distribution. A notion of composition of these functions intuitively makes sense: if the
+-- distribution over b depends on a value a (conditional), and the distribution over c depends
+-- on a value b, then what distribution underlies c given a? the answer is given by Kleisli
+-- composition! probability is a monad!
 
+instance Functor Dist where
+    fmap f = D . fmap (\(x,p) -> (f x,p)) . unD
 
+instance Applicative Dist where
+    pure = return
+    -- (<*>) :: Dist (a -> b) -> Dist a -> Dist b
+    f <*> x = D [(g z, P $ p*q) | (z, P p) <- unD x, (g, P q) <- unD f]
+
+instance Monad Dist where
+    return x = certainly x
+    (D d) >>= f = D [(y, P $ p*q) | (x, P p) <- d, (y, P q) <- unD (f x)]
+
+-- RECALL:
+-- monad => applicative
+-- proof: f <*> x = f >>= (\g -> x >>= (\z -> return $ g z)).
+--      in do notation this is do
+--                              g <- f
+--                              z <- x
+--                              return $ g z
+--  
+-- in this case, unwrapped in Dist this becomes
+--      f <*> x = D [(g z, P $ p*q) | (z, P p) <- x, (g, P q) <- f]
